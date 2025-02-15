@@ -18,6 +18,7 @@ def ivr_response():
                       {"role": "user", "content": user_input}]
         )
 
+        # ✅ שימוש בפורמט החדש של OpenAI
         ai_response = response["choices"][0]["message"]["content"]
 
         return jsonify({"text": ai_response})

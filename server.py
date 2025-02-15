@@ -17,7 +17,7 @@ def ivr_response():
             messages=[{"role": "system", "content": "אתה עוזר טלפוני חכם"},
                       {"role": "user", "content": user_input}]
         )
-        ai_response = response.choices[0].message.content
+        ai_response = response["choices"][0]["message"]["content"]
 
         return jsonify({"text": ai_response})
     

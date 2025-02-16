@@ -1,4 +1,4 @@
-from flask import Flask, request
+from flask import Flask, request, Response
 import requests
 import os
 
@@ -26,18 +26,17 @@ def ivr_response():
         response = requests.post("https://openrouter.ai/api/v1/chat/completions", json=data, headers=headers)
         response_json = response.json()
 
-        # אם יש תשובה מהמודל
         if "choices" in response_json:
             ai_response = response_json["choices"][0]["message"]["content"]
             
-            # ✅ מחזירים טקסט נקי בלי JSON
-            return ai_response, 200, {"Content-Type": "text/plain; charset=utf-8"}
+            # ✅ מחזירים טקסט נקי בלבד
+            return Response(ai_response, mimetype="text/plain; charset=utf-8")
         
         else:
-            return "לא התקבלה תשובה מהשרת", 500
+            return Response("לא התקבלה תשובה מהשרת.", mimetype="text/plain; charset=utf-8", status=500)
     
     except Exception as e:
-        return f"שגיאה: {str(e)}", 500
+        return Response(f"שגיאה: {str(e)}", mimetype="text/plain; charset=utf-8", status=500)
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

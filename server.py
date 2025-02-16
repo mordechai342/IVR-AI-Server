@@ -29,8 +29,8 @@ def ivr_response():
         if "choices" in response_json:
             ai_response = response_json["choices"][0]["message"]["content"]
             
-            # ✅ מחזירים טקסט נקי בלבד
-            return Response(ai_response, mimetype="text/plain; charset=utf-8")
+            # ✅ מחזירים טקסט נקי בלבד וללא HTML
+            return Response(ai_response.strip(), mimetype="text/plain; charset=utf-8")
         
         else:
             return Response("לא התקבלה תשובה מהשרת.", mimetype="text/plain; charset=utf-8", status=500)

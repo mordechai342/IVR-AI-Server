@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request
 import requests
 import os
 
@@ -26,15 +26,18 @@ def ivr_response():
         response = requests.post("https://openrouter.ai/api/v1/chat/completions", json=data, headers=headers)
         response_json = response.json()
 
-        # בדיקת שגיאות
+        # אם יש תשובה מהמודל
         if "choices" in response_json:
             ai_response = response_json["choices"][0]["message"]["content"]
-            return jsonify({"text": ai_response})
+            
+            # ✅ מחזירים טקסט נקי בלי JSON
+            return ai_response, 200, {"Content-Type": "text/plain; charset=utf-8"}
+        
         else:
-            return jsonify({"error": response_json}), 500
+            return "לא התקבלה תשובה מהשרת", 500
     
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return f"שגיאה: {str(e)}", 500
 
 if __name__ == '__main__':
     port = int(os.environ.get("PORT", 5000))

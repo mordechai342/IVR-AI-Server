@@ -1,27 +1,37 @@
 from flask import Flask, request, jsonify
-import openai
+import requests
 import os
 
 app = Flask(__name__)
 
 # קריאת מפתח ה-API מהסביבה
-openai.api_key = os.getenv("OPENAI_API_KEY")
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
 
 @app.route('/api/ivr', methods=['GET'])
 def ivr_response():
     try:
         user_input = request.args.get('text', 'שלום')
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "system", "content": "אתה עוזר טלפוני חכם"},
-                      {"role": "user", "content": user_input}]
-        )
+        headers = {
+            "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+            "Content-Type": "application/json"
+        }
 
-        # ✅ בפורמט הישן צריך להשתמש כך:
-        ai_response = response["choices"][0]["text"]
+        data = {
+            "model": "openai/gpt-3.5-turbo",
+            "messages": [{"role": "system", "content": "אתה עוזר טלפוני חכם"},
+                         {"role": "user", "content": user_input}]
+        }
 
-        return jsonify({"text": ai_response})
+        response = requests.post("https://openrouter.ai/api/v1/chat/completions", json=data, headers=headers)
+        response_json = response.json()
+
+        # בדיקת שגיאות
+        if "choices" in response_json:
+            ai_response = response_json["choices"][0]["message"]["content"]
+            return jsonify({"text": ai_response})
+        else:
+            return jsonify({"error": response_json}), 500
     
     except Exception as e:
         return jsonify({"error": str(e)}), 500
